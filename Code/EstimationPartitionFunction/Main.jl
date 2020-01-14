@@ -25,8 +25,8 @@ include(abs_path * "functions.jl");
 
 ## ======================== Initialize parameters of RBM =======================
 W = (2*rand(Nneurons,Ninput).-1)*4*sqrt(3.0/16.0);    # Initial weights (#h_units X #v_units)
-b = zeros(Ninput,1);                                  # Initial bias input neurons
-c = zeros(Nneurons,1);                                # Initial bias hidden neurons
+b = rand(Ninput,1);                                   # Initial bias input neurons
+c = rand(Nneurons,1);                                 # Initial bias hidden neurons
 
 ## =============================== Compute Real Z ==============================
 Z = computeRealZ(Nneurons,W,b,c,Ninput);

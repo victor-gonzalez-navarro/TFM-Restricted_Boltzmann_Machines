@@ -193,8 +193,9 @@ function compute_ZbNP(W,b,c,bin)
     return realZb
 end
 
-function createDataset(datatype, ReducedData, abs_path)
+function createDataset(datatype, abs_path)
     if datatype == "MNIST"
+        ReducedData = 1000;  # Number of instances for trainining (validation set are 1/3 and test is fixed)
         # Each line in matrix is a sample
         include(abs_path * "functions.jl");
         dataTrain_x, dataTrain_y, dataTest_x, dataTest_y = LoadData_MNIST(abs_path);

@@ -10,7 +10,7 @@ abs_path    = "/Users/gonav/Documents/GitHub/TFM-Restricted_Boltzmann_Machines/C
 learningR   = 0.1;                                     # Learning rate
 momentum    = 0.9;                                     # Momentum
 Nneurons    = 64;                                      # Number of neurons in the hidden layer
-Nepochs     = 1000000;                                 # Number of epochs
+Nepochs     = 5; # 1000000;                                 # Number of epochs
 NG          = 5;                                       # Number of Gibbs steps
 batchsize   = 30;                                      # Batch size for Stochastic Gradient Ascent
 
@@ -22,17 +22,14 @@ numInt      = 1000;                                    # Number of intermediate 
 NG2         = 10;                                      # Number of steps for running the Markov Chain for each intermediate distribution
 
 dataset     = "BS16";                                  # Dataset used in the experiment: "BS16", "BS09", "BS02-3", "LSE11", "LSE15", "P08", "P10"
-ReducedData = 1000;                                    # Number of instances for trainining (validation set are 1/3 and test is fixed)
-
 distr       = "empirical";                             # Type of distribution of the dataset
-
 plotLL      = 1;                                       # Plot LogLikelihood (just for small datasets)
 
 ## ======================== Import auxiliary functions =========================
 include(abs_path * "functions.jl");
 
 ## ============================== Create dataset ===============================
-I, I_real, full_targets = createDataset(dataset, ReducedData, abs_path);  # Input data: (#attr X #examples)
+I, I_real, full_targets = createDataset(dataset, abs_path);  # Input data: (#attr X #examples)
 
 ## ======================== Initialize parameters of RBM =======================
 Nexamples = size(I,2);
@@ -57,14 +54,9 @@ targdis = ones(size(I,2), 1)./size(I,2);
 # Compute RBM parameters
 param, plotparams = computeRBMparamAll(W, b, c, LLvec, Z, I, Nexamples, batchsize, NG, Nepochs, momentum, targdis, plotLL);
 
-# Save variables to perform the Plotting
-save_string = "info = LR"*string(learningR)*"MO"*string(momentum)*"NN"*string(Nneurons)*"EP"*string(Nepochs)*"NG"*string(NG)*"BA"*string(batchsize)*"K"*string(K)*"NGP"*string(NG_par)*"M"*string(M)*"NI"*string(numInt)*"NG2"*string(NG2)*"DA"*string(dataset)*"RD"*string(ReducedData)*"DS"*string(distr);
-println(save_string * ";");
+# Print results
 
-println("targdis = " * string(targdis) * ";");
-# save("/scratch/nas/4/victorg/JuliaUp/Output/"*save_string*".jld", "plotparams", plotparams, "targdis", targdis);
-
-println("expdis_CD1 = "    * string(plotparams["expdis_CD1"])    * ";");
+println("expdis_CD1 = "   * string(plotparams["expdis_CD1"])   * ";");
 println("expdis_CD = "    * string(plotparams["expdis_CD"])    * ";");
 println("expdis_WCD = "   * string(plotparams["expdis_WCD"])   * ";");
 println("expdis_PTCD = "  * string(plotparams["expdis_PTCD"])  * ";");
@@ -73,7 +65,7 @@ println("expdis_CDP = "   * string(plotparams["expdis_CDP"])   * ";");
 println("expdis_WCDP = "  * string(plotparams["expdis_WCDP"])  * ";");
 println("expdis_FIN = "   * string(plotparams["expdis_FIN"])   * ";");
 
-println("LLvec_CD1 = "     * string(plotparams["LLvec_CD1"])     * ";");
+println("LLvec_CD1 = "    * string(plotparams["LLvec_CD1"])    * ";");
 println("LLvec_CD = "     * string(plotparams["LLvec_CD"])     * ";");
 println("LLvec_WCD = "    * string(plotparams["LLvec_WCD"])    * ";");
 println("LLvec_PTCD = "   * string(plotparams["LLvec_PTCD"])   * ";");

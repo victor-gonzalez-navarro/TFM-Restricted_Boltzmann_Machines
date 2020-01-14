@@ -1,4 +1,4 @@
----------- MAIN CODE ------------
+-------------------- MAIN CODE --------------------- 
 This folder contains the main code of the project. Inside this folder we have 8 different Mains, although the code is the same. The only difference between these Mains is that some lines are commented in each Main to be able to parallelize the code. That is,
 
 - Main1.jl --> Contains the code when training the RBM with Contrastive Divergence with 1 Gibb step.
@@ -12,7 +12,11 @@ This folder contains the main code of the project. Inside this folder we have 8 
 
 When running these Main files, we generate the Log-Likelihood for each epoch over small problems and the probabilities assigned to the testing instances after training the Restricted Boltzmann Machine.
 
--------- OTHER EXPERIMENTS --------
+---------- ESTIMATION PARTITION FUNCTION ------------
+This folder contains the code to estimate the partition function of a Restricted Boltzmann Machine with Annealed Importance Sampling.
+
+
+----------------- OTHER EXPERIMENTS ----------------- 
 This folder contains the code to compare the performance of each algorithm described above for high-dimensional problems. Two sub-folders are included, one to test the sampling performance between Gibbs and Parallel Tempering, and the other one to test the learning performance between Gibbs and Parallel Tempering.
 
 ** NOTE ** There is a variable to set the path of the Main files. It is important to change this variable to the local path of each user.

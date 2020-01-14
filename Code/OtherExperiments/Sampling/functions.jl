@@ -29,6 +29,7 @@ function gibbsRBM(x, W, b, c, NG)
 end;
 
 function gibbsRBMv2(x, W, b, c, NG)
+    # Modified version of GibbsRBM to save all the samples from the chain
     samples_return = zeros(size(x,1),1);
     count = 1;
     for i = 1:NG
@@ -46,11 +47,6 @@ function gibbsRBMv2(x, W, b, c, NG)
         samples_return = copy(x);
     end
     return samples_return
-end;
-
-function compute_Pxbinary(x,W,b,c)
-    # Computation of the unnormalized probability
-    Px = exp.(b'*x) .* prod(1 .+ exp.(W*x .+ c), dims=1);  # Only useful for binary inputs
 end;
 
 function compute_Pxbinary_PTcondition(x,W,b,c)
@@ -96,16 +92,6 @@ function gibbsPT(x, W, b, c, NG, K, NG_par)
     return samples_return
 end;
 
-function exp_distribution(full_data,samples)
-    dist = zeros(size(full_data,2));
-    for idx=1:size(full_data,2)
-        val = copy(full_data[:,idx]);
-        dist[idx] = sum(Bool[ val == samples[:,i] for i=1:size(samples,2)]);
-    end
-    dist = dist ./ size(samples,2);
-    return dist
-end;
-
 function tobin(num)
   # Convert decimal to binary numbers
   @match num begin
@@ -128,14 +114,13 @@ function de2bi(num, len)
 end;
 
 function myLogSumExp(logX)
-
   max_logX = maximum(logX);
   return (max_logX + log(sum(exp.(logX .- max_logX))));
 
 end;
 
 function generateWeightsRows(typeUnits,Nv,Nh,Ak,b,c)
-  ### Computation of W
+  # Generate parameters of W with equal rows
   W = ones(Nv+1,Nh+1);
   for kv in 1:Nv
     W[kv+1,:] .= Ak[kv];
@@ -144,19 +129,7 @@ function generateWeightsRows(typeUnits,Nv,Nh,Ak,b,c)
   W[2:end,1]  = b;
   W[1,1] = 0;
 
-  ###
-  ### Computation of logZ
-  ###
-  ### Neurons in {0,1}
-  ###
-  ###   Z = sum Nh  ( Nh ) exp(c*kh) prod Nv  (1 + exp(alpha_i * kh + b))
-  ###          kh=0 ( kh )                i=1
-  ###
-  ### Neurons in {-1,+1}
-  ###
-  ###   Z = sum Nh  ( Nh ) exp(c*kh) prod Nv  ( exp(-alpha_i * (Nh-2*kh) - b) + exp(+alpha_i * (Nh-2*kh) + b) )
-  ###          kh=0 ( kh )                i=1
-  ###
+  # Computation of logZ
   logZv = Float64[];
   n_kh = 0;
   for kh in 0:Nh
@@ -177,8 +150,7 @@ function generateWeightsRows(typeUnits,Nv,Nh,Ak,b,c)
       push!(logZv,log(n_kh) + sumf + c*(Nh-2*kh));
     end;
   end;
-
-  ### Sanity check - exact computation
+  # Sanity check - exact computation
   if Nv <= 10 && Nh <= 10   ### it can be improved...
     bb = b;
     cc = c * ones(Nh);
@@ -205,27 +177,12 @@ function generateWeightsRows(typeUnits,Nv,Nh,Ak,b,c)
     end
     println("(Sanity check logZ) = ",log(Z))
   end
-
-  ##########################
   logZ = myLogSumExp(logZv)
-  #println(log(Z))
-
   return W, logZ;
 end;
 
-function analysis(samples, W, b, c, logZ)
-    # Find indices of unique columns (samples)
-    indices,occurre = uniqueind(samples);
-    # Compute target probabilities
-    targetprob = zeros(1,length(indices));
-    for id = 1:length(indices)
-        x = samples[:,indices[id]];
-        targetprob[1,id] = MathConstants.e.^(log(exp.(b'*x)[1]) + sum(log.(1 .+ exp.(c' .+ x'*W'))) .- logZ);
-    end
-    targetprob = targetprob ./ sum(targetprob);
-    # Compute experimental probabilities
-    experiprob = occurre ./ sum(occurre);
-    return targetprob, experiprob
+function kl_divergence(p, q)
+    return sum(p .* log.(p ./ q));
 end;
 
 function uniqueind(mat)
@@ -246,20 +203,24 @@ function uniqueind(mat)
     return indices,occurre
 end;
 
-function kl_divergence(p, q)
-    return sum(p .* log.(p ./ q));
-end;
-
-function c_assert(boolean, phrase)
-    if boolean == false
-        println(phrase)
-        error(phrase)
+function analysis(samples, W, b, c, logZ)
+    # Function to compute the probability distribution of the RBM and the Sampling algorithm using only the generated samples
+    indices,occurre = uniqueind(samples);  # Find indices of unique columns (samples)
+    # Compute model probabilities
+    targetprob = zeros(1,length(indices));
+    for id = 1:length(indices)
+        x = samples[:,indices[id]];
+        targetprob[1,id] = MathConstants.e.^(log(exp.(b'*x)[1]) + sum(log.(1 .+ exp.(c' .+ x'*W'))) .- logZ);
     end
+    targetprob = targetprob ./ sum(targetprob);
+    # Compute experimental probabilities
+    experiprob = occurre ./ sum(occurre);
+    return targetprob, experiprob
 end;
 
 function analysis2(samples, W, b, c, logZ)
-    # Find indices of unique columns (samples)
-    indices,occurre = uniqueind(samples);
+    # Function to compute the Log-Likelihood and the Sum of the Probabilities
+    indices,occurre = uniqueind(samples);  # Find indices of unique columns (samples)
     # Compute target probabilities
     targetprob = zeros(1,length(indices));
     targetproblog = zeros(1,length(indices));
@@ -272,13 +233,14 @@ function analysis2(samples, W, b, c, logZ)
     end
     # Compute LogLikelihood and sum of probabilities
     logLikelihood = sum(targetproblog);
-    sumProb = sum(targetprob);
+    sumProb = sum(targetprob)/sum(occurre);
     return logLikelihood, sumProb;
 end;
 
 function analysis3(topPrbSamples, empiSamplesRBM, empiSamplesPT, W, b, c, logZ)
-    # Find indices of unique columns (samples)
-    # indices,occurre = uniqueind(topPrbSamples);
+    # Function to compute the model probability distribution of the RBM and the empirical
+    # using the generated samples with higher probability
+
     # Compute target probabilities
     targetprob = zeros(1,size(topPrbSamples,2));
     experiprobRBM = zeros(1,size(topPrbSamples,2));
@@ -302,9 +264,7 @@ function analysis3(topPrbSamples, empiSamplesRBM, empiSamplesPT, W, b, c, logZ)
         experiprobPT[1,id] = countPT + 0.0001;
     end
     targetprob = targetprob ./ sum(targetprob);
-    # println(reverse(sortperm(vec(targetprob))););
-    # Compute experimental probabilities
-    experiprobRBM = experiprobRBM;
-    experiprobPT = experiprobPT;
+    experiprobRBM = experiprobRBM ./ sum(experiprobRBM);
+    experiprobPT = experiprobPT ./ sum(experiprobPT);
     return targetprob, experiprobRBM, experiprobPT
 end;

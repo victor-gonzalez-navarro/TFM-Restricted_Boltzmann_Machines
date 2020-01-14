@@ -54,8 +54,7 @@ targdis = ones(size(I,2), 1)./size(I,2);
 # Compute RBM parameters
 param, plotparams = computeRBMparamAll(W, b, c, LLvec, Z, I, Nexamples, batchsize, NG, Nepochs, momentum, targdis, plotLL);
 
-# Print results
-
+## =============================== Print Results ===============================
 println("expdis_CD1 = "   * string(plotparams["expdis_CD1"])   * ";");
 println("expdis_CD = "    * string(plotparams["expdis_CD"])    * ";");
 println("expdis_WCD = "   * string(plotparams["expdis_WCD"])   * ";");

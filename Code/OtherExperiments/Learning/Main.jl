@@ -11,7 +11,7 @@ abs_path    = "/Users/gonav/Documents/GitHub/TFM-Restricted_Boltzmann_Machines/C
 learningR   = 0.1;                                    # Learning rate
 momentum    = 0.9;                                    # Momentum
 Nneurons    = 700;                                    # Number of neurons in the hidden layer
-Nepochs     = 50;                                    # Number of epochs
+Nepochs     = 5000000;                                # Number of epochs
 NG          = 5;                                      # Number of Gibbs steps
 batchsize   = 256;                                    # Batch size for Stochastic Gradient Ascent
 

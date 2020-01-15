@@ -71,16 +71,19 @@ end
 
 ## ============================= Compute Distances =============================
 # Compare probability distributions (model with experimental) using empirical samples
+println("Computing measure 1");
 targetprobRBM, experiprobRBM = analysis(samples_gibbsRBM, W, b, c, logZ);
 targetprobPT, experiprobPT = analysis(samples_gibbsPT, W, b, c, logZ);
 distancesKLRBM = kl_divergence(targetprobRBM, experiprobRBM);
 distancesKLPT  = kl_divergence(targetprobPT, experiprobPT);
 
 # Compute the LogLikelihood and sum of probabilities of obtained samples using model distribution
+println("Computing measure 2");
 logLikelihRBM,sumprobabiRBM = analysis2(samples_gibbsRBM, W, b, c, logZ);
 logLikelihPT,sumprobabiPT   = analysis2(samples_gibbsPT, W, b, c, logZ);
 
 # Compare probability distributions (model with experimental) using top probability samples
+println("Computing measure 3");
 targetprob, experiprobRBM2, experiprobPT2 = analysis3(statesHighProb', samples_gibbsRBM, samples_gibbsPT, W, b, c, logZ);
 distancesKL2RBM = kl_divergence(targetprob, experiprobRBM2);
 distancesKL2PT  = kl_divergence(targetprob, experiprobPT2);

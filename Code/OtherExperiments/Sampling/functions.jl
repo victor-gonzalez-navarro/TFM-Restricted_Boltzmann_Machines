@@ -8,7 +8,7 @@ end;
 function gibbsRBM(x, W, b, c, NG)
     samples_return = zeros(size(x,1),trunc(Int, NG/5));
     count = 1;
-    for i = 1:NG
+    @showprogress 1 "Computing Samples RBM..." for i = 1:NG
         # Find hidden units by sampling the visible layer
         lgst_c_xi = sigmoid(c .+ W* x);                  # lgst_c_x = (#h_units X batch_size)
         rand_vector = rand(size(lgst_c_xi,1),size(lgst_c_xi,2));
@@ -62,7 +62,7 @@ function gibbsPT(x, W, b, c, NG, K, NG_par)
     # Initialize samples as a matrix of [x_1,x_1,...,x_1]
     samples = repeat(x,1,K);
     # Start Gibbs sampling with multiple RBMS (Paralle Tempering)
-    for i=1:NG
+    @showprogress 1 "Computing samples PT..." for i=1:NG
         for idt=1:K  # This can be done in parallel
             t = candidates_T[idt];
             samples[:,idt] = gibbsRBMv2(samples[:,idt], t*W, b, c, NG_par);
